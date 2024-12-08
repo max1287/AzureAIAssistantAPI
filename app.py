@@ -1,14 +1,25 @@
-from flask import jsonify, render_template, request
-from AzureAIAssistantProxy import app
-
-from azureAIClient import client
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from openai import AzureOpenAI
 import time
 import json
+
+from flask import (Flask, redirect, render_template, request,
+                   send_from_directory, url_for, jsonify)
+
+app = Flask(__name__)
+
+load_dotenv()
+client = AzureOpenAI(
+    api_key=os.getenv("AZURE_OPENAI_KEY"),  # Your API key for the assistant api model
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),  # API version  (i.e. 2024-02-15-preview)
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+)
 
 @app.route('/')
 def home():
     return "READY"
-
 
 @app.route('/start-thread', methods=['POST'])
 def start_thread():
@@ -72,4 +83,6 @@ def process_message():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
+if __name__ == '__main__':
+   app.run()
